@@ -117,7 +117,7 @@ async def startup():
 
 # Define Unity MCP tools using the decorator syntax
 @mcp.tool()
-async def unity_create_primitive(ctx: Context, type: str, position: dict = None) -> str:
+async def unity_create_primitive(ctx: Context, type: str, name: str ,position: dict = None) -> str:
     """
     Create a primitive GameObject in Unity
     
@@ -133,7 +133,8 @@ async def unity_create_primitive(ctx: Context, type: str, position: dict = None)
             "action": "createPrimitive",
             "params": {
                 "type": type,
-                "position": position
+                "position": position,
+                "name": name
             }
         })
         

@@ -387,7 +387,7 @@ public class SimpleUnityWebSocketServer : MonoBehaviour
     private JObject HandleCreatePrimitive(JObject parameters)
     {
         string primitiveType = parameters["type"].ToString();
-        
+        string name = parameters["name"].ToString();
         Vector3 position = new Vector3();
         if (parameters["position"] != null)
         {
@@ -400,7 +400,7 @@ public class SimpleUnityWebSocketServer : MonoBehaviour
         PrimitiveType type = (PrimitiveType)Enum.Parse(typeof(PrimitiveType), primitiveType, true);
         GameObject primitive = GameObject.CreatePrimitive(type);
         primitive.transform.position = position;
-        primitive.name = primitiveType + "_" + Guid.NewGuid().ToString().Substring(0, 8);
+        primitive.name = name;
         
         Debug.Log($"Created primitive: {primitive.name} at position {position}");
         
@@ -477,34 +477,43 @@ public class SimpleUnityWebSocketServer : MonoBehaviour
         if (parameters["position"] != null)
         {
             JObject posObj = parameters["position"] as JObject;
-            Vector3 position = new Vector3(
-                posObj["x"]?.Value<float>() ?? targetObject.transform.position.x,
-                posObj["y"]?.Value<float>() ?? targetObject.transform.position.y,
-                posObj["z"]?.Value<float>() ?? targetObject.transform.position.z
-            );
-            targetObject.transform.position = position;
+            if (posObj !=  null)
+            {
+                Vector3 position = new Vector3(
+                    posObj["x"]?.Value<float>() ?? targetObject.transform.position.x,
+                    posObj["y"]?.Value<float>() ?? targetObject.transform.position.y,
+                    posObj["z"]?.Value<float>() ?? targetObject.transform.position.z
+                );
+                targetObject.transform.position = position;
+            }
         }
         
         if (parameters["rotation"] != null)
         {
             JObject rotObj = parameters["rotation"] as JObject;
-            Vector3 rotation = new Vector3(
-                rotObj["x"]?.Value<float>() ?? targetObject.transform.eulerAngles.x,
-                rotObj["y"]?.Value<float>() ?? targetObject.transform.eulerAngles.y,
-                rotObj["z"]?.Value<float>() ?? targetObject.transform.eulerAngles.z
-            );
-            targetObject.transform.eulerAngles = rotation;
+            if (rotObj != null)
+            {
+                Vector3 rotation = new Vector3(
+                    rotObj["x"]?.Value<float>() ?? targetObject.transform.eulerAngles.x,
+                    rotObj["y"]?.Value<float>() ?? targetObject.transform.eulerAngles.y,
+                    rotObj["z"]?.Value<float>() ?? targetObject.transform.eulerAngles.z
+                );
+                targetObject.transform.eulerAngles = rotation;
+            }
         }
         
         if (parameters["scale"] != null)
         {
             JObject scaleObj = parameters["scale"] as JObject;
-            Vector3 scale = new Vector3(
-                scaleObj["x"]?.Value<float>() ?? targetObject.transform.localScale.x,
-                scaleObj["y"]?.Value<float>() ?? targetObject.transform.localScale.y,
-                scaleObj["z"]?.Value<float>() ?? targetObject.transform.localScale.z
-            );
-            targetObject.transform.localScale = scale;
+            if (scaleObj != null)
+            {
+                Vector3 scale = new Vector3(
+                    scaleObj["x"]?.Value<float>() ?? targetObject.transform.localScale.x,
+                    scaleObj["y"]?.Value<float>() ?? targetObject.transform.localScale.y,
+                    scaleObj["z"]?.Value<float>() ?? targetObject.transform.localScale.z
+                );
+                targetObject.transform.localScale = scale;
+            }
         }
         
         return new JObject {
