@@ -348,6 +348,64 @@ async def unity_instantiate_prefab(ctx: Context, prefabPath: str, position: dict
     except Exception as e:
         logger.error(f"Error in instantiate_prefab: {str(e)}")
         return f"Failed to instantiate prefab: {str(e)}"
+        
+
+@mcp.tool()
+async def unity_create_script(ctx: Context, objectName: str, scriptName: str, properties: dict = None) -> str:
+    """
+    Create a script (MonoBehaviour) to a GameObject in Unity at runtime
+    
+    Args:
+        objectName: The name of the GameObject to add the script to
+        scriptName: The fully qualified name of the script class (e.g., 'RotateScript')
+        properties: Optional dictionary of property values to set on the script
+    """
+    try:
+        response = await send_to_unity({
+            "action": "createScript",
+            "params": {
+                "objectName": objectName,
+                "scriptName": scriptName,
+                "properties": properties
+            }
+        })
+        
+        if "error" in response:
+            return f"Failed to add script: {response['error']}"
+            
+        result = response.get("result", {})
+        return f"Added script {scriptName} to {objectName}"
+    except Exception as e:
+        logger.error(f"Error in add_script: {str(e)}")
+        return f"Failed to add script: {str(e)}"
+        
+        
+@mcp.tool()
+async def unity_add_script(ctx: Context, objectName: str, componentType: str) -> str:
+    """
+    Add a script to a GameObject in Unity
+    
+    Args:
+        objectName: The name of the GameObject to add the component to
+        componentType: The type of component to add (e.g., Rigidbody, BoxCollider)
+    """
+    try:
+        response = await send_to_unity({
+            "action": "addScript",
+            "params": {
+                "objectName": objectName,
+                "scriptName": componentType
+            }
+        })
+        
+        result = response.get("result", {})
+        if "error" in response:
+            return f"Failed to add component: {response['error']}"
+            
+        return f"Added {componentType} to {objectName}"
+    except Exception as e:
+        logger.error(f"Error in add_component: {str(e)}")
+        return f"Failed to add component: {str(e)}"
 
 
 # Start the MCP server using run() with stdio transport
