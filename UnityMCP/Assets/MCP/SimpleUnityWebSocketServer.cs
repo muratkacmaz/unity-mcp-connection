@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
@@ -608,14 +609,7 @@ private void ProcessRequest(TcpClient client, JObject request)
 
     private JObject HandleCreateScript(JObject parameters)
     {
-        string objectName = parameters["objectName"].ToString();
         string scriptName = parameters["scriptName"].ToString();
-
-        GameObject targetObject = GameObject.Find(objectName);
-        if (targetObject == null)
-        {
-            throw new Exception($"Object '{objectName}' not found");
-        }
 
         // Try to find the script type in all loaded assemblies
         Type scriptType = null;
@@ -631,33 +625,32 @@ private void ProcessRequest(TcpClient client, JObject request)
             throw new Exception($"Script type '{scriptName}' not found");
         }
 
-        // Check if script is a MonoBehaviour (component)
+        // Ensure it's a MonoBehaviour-derived class (optional, can be removed if not needed)
         if (!typeof(MonoBehaviour).IsAssignableFrom(scriptType))
         {
             throw new Exception($"Script '{scriptName}' is not a MonoBehaviour");
         }
 
-        // Add the component (script) to the object
-        Component component = targetObject.AddComponent(scriptType);
-
-        // Set script properties if provided
+        // We do not create or attach it to any GameObject.
+        // We can only modify static fields or properties
         if (parameters["properties"] != null)
         {
             JObject props = parameters["properties"] as JObject;
             foreach (var prop in props.Properties())
             {
-                var property = scriptType.GetProperty(prop.Name);
+                var property = scriptType.GetProperty(prop.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
                 if (property != null && property.CanWrite)
                 {
                     object value = ConvertValue(prop.Value, property.PropertyType);
-                    property.SetValue(component, value);
+                    property.SetValue(null, value); // null for static
+                    continue;
                 }
 
-                var field = scriptType.GetField(prop.Name);
+                var field = scriptType.GetField(prop.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
                 if (field != null)
                 {
                     object value = ConvertValue(prop.Value, field.FieldType);
-                    field.SetValue(component, value);
+                    field.SetValue(null, value); // null for static
                 }
             }
         }
@@ -665,11 +658,10 @@ private void ProcessRequest(TcpClient client, JObject request)
         return new JObject
         {
             ["success"] = true,
-            ["componentId"] = component.GetInstanceID(),
             ["scriptName"] = scriptName
         };
     }
-
+    
     private object ConvertValue(JToken token, Type targetType)
     {
         if (targetType == typeof(Vector3) && token is JObject vecObj)

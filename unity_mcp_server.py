@@ -351,12 +351,11 @@ async def unity_instantiate_prefab(ctx: Context, prefabPath: str, position: dict
         
 
 @mcp.tool()
-async def unity_create_script(ctx: Context, objectName: str, scriptName: str, properties: dict = None) -> str:
+async def unity_create_script(ctx: Context, scriptName: str, properties: dict = None) -> str:
     """
     Create a script (MonoBehaviour) to a GameObject in Unity at runtime
     
     Args:
-        objectName: The name of the GameObject to add the script to
         scriptName: The fully qualified name of the script class (e.g., 'RotateScript')
         properties: Optional dictionary of property values to set on the script
     """
@@ -364,7 +363,6 @@ async def unity_create_script(ctx: Context, objectName: str, scriptName: str, pr
         response = await send_to_unity({
             "action": "createScript",
             "params": {
-                "objectName": objectName,
                 "scriptName": scriptName,
                 "properties": properties
             }
