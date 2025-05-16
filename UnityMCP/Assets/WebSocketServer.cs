@@ -12,7 +12,7 @@ using System.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-public class SimpleUnityWebSocketServer : MonoBehaviour
+public class WebSocketServer : MonoBehaviour
 {
     [SerializeField] private int port = 8090;
     private TcpListener server;
